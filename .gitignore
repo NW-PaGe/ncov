@@ -8,6 +8,11 @@ auspice/
 data/*
 defaults/colors.tsv
 defaults/colors_*.tsv
+/ncov_wa/data/county_metadata.csv
+/ncov_wa/data/tmp.tsv
+temp_decompressed.fasta
+
+
 # stats.json was removed in Snakemake v8
 stats.json
 
