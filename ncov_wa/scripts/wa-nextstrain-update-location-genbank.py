@@ -31,7 +31,7 @@ def drop_index_dup(doh_metadata):
 
 # update location
 def update_location(doh_metadata, genbank_metadata):
-    doh_metadata['location'] = doh_metadata['County'] 
+    doh_metadata['location'] = doh_metadata['County']
     # merge the dataframes on a common column
     merged_df = pd.merge(genbank_metadata, doh_metadata, on='strain', how='left')
     # update the location column in the genbank dataframe
@@ -47,7 +47,7 @@ def update_location(doh_metadata, genbank_metadata):
 def update_division(merged_df):
     df = pd.DataFrame(merged_df)
     if 'division' in df:
-        df.loc[df['division'] == 'USA', 'division'] = 'Washington'
+        df.loc[df['division'].str.contains('WA|Washington', case=False, na=False), 'division'] = 'Washington'
     return df
 
 def specify_dup_counties(df):

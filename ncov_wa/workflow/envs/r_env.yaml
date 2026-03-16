@@ -1,0 +1,12 @@
+channels:
+  - conda-forge
+  - bioconda
+
+dependencies:
+  - r-base=4.3
+  - r-dplyr
+  - r-tidyr
+  - r-magrittr
+  - r-readr
+  - r-stringr
+  - bioconductor-biostrings
