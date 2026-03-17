@@ -1,15 +1,28 @@
 #Taking NCBI WA data for formatting it for Nextstrain ingest
 
 
+
+##################################
+# Load required packages
+##################################
 library(dplyr)
 library(magrittr)
-library(tidyr)
-library(readr)
-library(tidyr)
 library(stringr)
-library(Biostrings)
-#library(writexl)
 
+
+
+# Install Biostrings if not available
+local_lib <- path.expand("~/R/library")
+dir.create(local_lib, recursive = TRUE, showWarnings = FALSE)
+.libPaths(c(local_lib, .libPaths()))
+
+if (!requireNamespace("BiocManager", quietly = TRUE)) {
+  install.packages("BiocManager", lib = local_lib, repos = "https://cran.r-project.org")
+}
+if (!requireNamespace("Biostrings", quietly = TRUE)) {
+  BiocManager::install("Biostrings", lib = local_lib)
+}
+library(Biostrings)
 
 
 print(.libPaths())
@@ -31,7 +44,7 @@ output_sequences <- args[4]
 
 #read in dataset
 
-wa_metadata_raw <- read.delim(input_metadata)
+wa_metadata_raw <- read.delim(input_metadata,stringsAsFactors = FALSE)
 
 clean_wa_metadata <- wa_metadata_raw %>%
         mutate(
@@ -85,14 +98,17 @@ clean_wa_metadata <- wa_metadata_raw %>%
       mutate(Geographic.Location_nospace = gsub("\\s*(:)\\s*", "\\1", Geographic.Location),
            location = "?") %>%
       mutate(location = gsub(".*?,\\s*", "", Geographic.Location)) %>%
-      separate(Geographic.Location_nospace, into = c("country", "division"), sep = ":", fill = "right") %>%
+      mutate(
+        country = str_trim(sapply(strsplit(Geographic.Location_nospace, ":"), `[`, 1)),
+        division = str_trim(sapply(strsplit(Geographic.Location_nospace, ":"), `[`, 2))
+      ) %>%
       mutate(division = ifelse(is.na(division), "?", division)) %>%
     # Hard code division variable
     mutate(division = "Washington") 
 
 #Write out metadata file subset to Washington sequences
 
-write_tsv(clean_wa_metadata, output_metadata)
+write.table(clean_wa_metadata, file = output_metadata, sep = "\t", row.names = FALSE, quote = FALSE)
 
 ##################################
 # Processsing fasta file
@@ -120,6 +136,23 @@ meta_match <-clean_wa_metadata %>%
 
 #Does fasta sequences match what is in metadata?
 seq_match <- fasta[names(fasta) %in% meta_match$strain]
+
+
+# Diagnostics 
+message("Total sequences in fasta: ", length(fasta))
+message("Total rows in metadata: ", nrow(clean_wa_metadata))
+message("Metadata rows matching fasta: ", nrow(meta_match))
+message("Sequences matching metadata: ", length(seq_match))
+message("First few fasta names: ")
+print(head(names(fasta)))
+message("First few metadata strains: ")
+print(head(clean_wa_metadata$strain))
+
+# Create output directory if it doesn't exist
+dir.create(dirname(output_sequences), recursive = TRUE, showWarnings = FALSE)
+
+# Clean trailing commas from fasta names before writing
+names(seq_match) <- str_remove(names(seq_match), ",+$")
 
 
 #Write to ncov directory

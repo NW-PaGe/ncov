@@ -5,8 +5,8 @@ custom_rules:
 # update input location, this is the dataset you will be including in build
 inputs:
   - name: wa_1y
-    metadata: "data/wa_sars2/ncbi_dataset/data/wa-sequences.tar.xz" #this is the compressed verison of the cleared and filtered wa data
-    sequences: "data/wa_sars2/ncbi_dataset/data/wa-sequences.tar.xz"
+    metadata: "data/wa-sequences.tar.xz" #this is the compressed verison of the cleared and filtered wa data
+    sequences: "data/wa-sequences.tar.xz"
   - name: contextual
     metadata: "https://data.nextstrain.org/files/ncov/open/global/metadata.tsv.xz"
     sequences: "https://data.nextstrain.org/files/ncov/open/global/sequences.fasta.xz"

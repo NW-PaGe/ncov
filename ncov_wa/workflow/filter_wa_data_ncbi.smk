@@ -1,4 +1,7 @@
 rule pull_full_data:
+    output:
+        metadata="data/wa_sars2/ncbi_dataset/data/wa_metadata_raw.tsv",
+        sequences="data/wa_sars2/ncbi_dataset/data/wa_sequences.fasta"
     shell:
         """
         bash ncov_wa/scripts/pull_ncbi_wa_data.sh
