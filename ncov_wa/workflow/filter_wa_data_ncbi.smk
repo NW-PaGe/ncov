@@ -17,7 +17,7 @@ rule filter_wa_data_step:
         filtered_wa_sequences="data/filtered_wa_sequences.fasta"
     shell:
         """
-        Rscript ncov_wa/scripts/NCBI_to_GISAID_format_sc2.R {input.metadata} {input.sequences} {output.filtered_wa_metadata} {output.filtered_wa_sequences}
+        python3 ncov_wa/scripts/NCBI_to_GISAID_format_sc2.py {input.metadata} {input.sequences} {output.filtered_wa_metadata} {output.filtered_wa_sequences}
         """
 
 
