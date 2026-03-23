@@ -1,5 +1,12 @@
 #!/bin/bash
 
+echo "Installing NCBI datasets CLI..."
+curl -fsSL "https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-amd64/datasets" -o datasets
+curl -fsSL "https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-amd64/dataformat" -o dataformat
+chmod +x datasets dataformat
+
+
+echo "Downloading WA SARS-CoV-2 sequences from NCBI..."
 datasets download virus genome taxon sars-cov-2 --usa-state WA --filename ./data/wa_sars2.zip
 
 unzip ./data/wa_sars2.zip -d ./data/wa_sars2
