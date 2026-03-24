@@ -36,7 +36,7 @@ env:
     # AWS Batch Resource Configuration
     # -------------------------------------------------------------------------
     BATCH_CPUS: "64"
-    BATCH_MEMORY: "10240"
+    BATCH_MEMORY: "137439"
 
     # -------------------------------------------------------------------------
     # These must be set in CodeBuild Environment Variables (not here):
