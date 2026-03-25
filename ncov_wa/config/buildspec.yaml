@@ -51,10 +51,10 @@ phases:
   pre_build:
     commands:
       - echo "Downloading county_metadata from S3..."
-      - aws s3://${S3_BUCKET}/metadata/county_metadata.csv ./ncov_wa/data/county_metadata.csv
+      - aws s3 cp s3://${S3_BUCKET}/metadata/county_metadata.csv ./ncov_wa/data/county_metadata.csv
       - echo "County metadata download complete"
       - ls -la ./ncov_wa/data/
-      
+
   build:
     commands:
       - echo "Starting ${BUILD_NAME} Nextstrain Build"
