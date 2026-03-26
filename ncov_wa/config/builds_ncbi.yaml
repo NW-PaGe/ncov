@@ -1,11 +1,11 @@
 custom_rules:
-  - ncov_wa/workflow/filter_wa_data.smk
+  - ncov_wa/workflow/filter_wa_data_ncbi.smk
 
 
 # update input location, this is the dataset you will be including in build
 inputs:
   - name: wa_1y
-    metadata: "data/wa-sequences.tar.xz" #this is the compressed verison of the cleaned and filtered wa data
+    metadata: "data/wa-sequences.tar.xz" #this is the compressed verison of the cleared and filtered wa data
     sequences: "data/wa-sequences.tar.xz"
   - name: contextual
     metadata: "https://data.nextstrain.org/files/ncov/open/global/metadata.tsv.xz"
@@ -36,7 +36,7 @@ filters:
 subsampling:
   one-year-priority:
     local-focus:
-      min_date: --min-date {earliest_date}
+      min_date: --min-date 2025
       min_length: --min_length 27000
       query: --query "(country == 'USA' & division == '{division}')"
       #other_filters: "--include-where 'division=Washington'"

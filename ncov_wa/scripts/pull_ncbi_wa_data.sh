@@ -1,13 +1,19 @@
 #!/bin/bash
 
-datasets download virus genome taxon sars-cov-2 --usa-state WA --filename wa_sars2.zip
+echo "Installing NCBI datasets CLI..."
+curl -fsSL "https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-amd64/datasets" -o datasets
+curl -fsSL "https://ftp.ncbi.nlm.nih.gov/pub/datasets/command-line/v2/linux-amd64/dataformat" -o dataformat
+chmod +x datasets dataformat
 
-unzip wa_sars2.zip -d wa_sars2
 
-cp wa_sars2/ncbi_dataset/data/genomic.fna wa_sars2/ncbi_dataset/data/wa_sequences.fasta
+echo "Downloading WA SARS-CoV-2 sequences from NCBI..."
+./datasets download virus genome taxon sars-cov-2 --usa-state WA --filename ./data/wa_sars2.zip
 
-dataformat tsv virus-genome --inputfile wa_sars2/ncbi_dataset/data/data_report.jsonl --fields accession,sourcedb,isolate-lineage,geo-region,geo-location,isolate-collection-date,release-date,update-date,length,host-name,is-lab-host,isolate-lineage-source,bioprojects,biosample-acc,sra-accs,submitter-names,submitter-affiliation > wa_sars2/ncbi_dataset/data/wa_metadata.tsv
+unzip ./data/wa_sars2.zip -d ./data/wa_sars2
 
-rscript NCBI_to_GISAID_format.R
+cp ./data/wa_sars2/ncbi_dataset/data/genomic.fna ./data/wa_sars2/ncbi_dataset/data/wa_sequences.fasta
 
-echo "NCBI WA metadata and sequences downloaded and cleaned"
+#pull all fields in ncbi dataset
+./dataformat tsv virus-genome --inputfile ./data/wa_sars2/ncbi_dataset/data/data_report.jsonl > ./data/wa_sars2/ncbi_dataset/data/wa_metadata_raw.tsv
+
+echo "NCBI WA metadata and sequences downloaded"
