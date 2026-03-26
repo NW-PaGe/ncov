@@ -21,24 +21,35 @@ wa_metadata_raw = pd.read_csv(input_metadata, sep="\t", dtype=str)
 #create a copy of wa_metadata_raw
 wa_metadata_clean = wa_metadata_raw.copy()
 
-# ---clean date columns
-date_raw = wa_metadata_clean["Isolate Collection date"].str.strip().str.replace("/", "-", regex=False)
-    #defining this so the operation doens't need to be repeated 6x
+### modified this next bit to work as a function:
+def clean_date_columns(metadata):
+    """
+    CLEAN DATE COLUMNS
+    args:
+        metadata: pd dataframe with dirty columns
+    output:
+        pd dataframe with clean date columns
+    """
+    date_raw = wa_metadata_clean["Isolate Collection date"].str.strip().str.replace("/", "-", regex=False)
+        #defining this so the operation doens't need to be repeated 6x
 
-conditions = [
-    date_raw.str.match(r"^\d{4}$").fillna(False),           # e.g. "2024"       → "2024-XX-XX"
-    date_raw.str.match(r"^\d{4}-\d{2}$").fillna(False),     # e.g. "2024-05"    → "2024-05-XX"
-    date_raw.str.match(r"^\d{4}-\d{2}-\d{2}$").fillna(False) # e.g. "2024-05-01" → unchanged
-]
-choices = [
-    date_raw + "-XX-XX",
-    date_raw + "-XX",
-    date_raw, #if date is already in correct format, no modifications
-]
-
+    conditions = [
+        date_raw.str.match(r"^\d{4}$").fillna(False),           # e.g. "2024"       → "2024-XX-XX"
+        date_raw.str.match(r"^\d{4}-\d{2}$").fillna(False),     # e.g. "2024-05"    → "2024-05-XX"
+        date_raw.str.match(r"^\d{4}-\d{2}-\d{2}$").fillna(False) # e.g. "2024-05-01" → unchanged
+    ]
+    choices = [
+        date_raw + "-XX-XX",
+        date_raw + "-XX",
+        date_raw, #if date is already in correct format, no modifications
+    ]
     #Formatting 'date' and 'Release_Date' columns
-wa_metadata_clean["date"]         = np.select(conditions, choices, default=None)
-wa_metadata_clean["Release_Date"] = np.select(conditions, choices, default=None)
+    wa_metadata_clean["date"]         = np.select(conditions, choices, default=None)
+    wa_metadata_clean["Release_Date"] = np.select(conditions, choices, default=None)
+    return wa_metadata_clean # send only the end result dataframe outside of the function (i.e. 'conditions' disappears)
+
+# now call the function on the data with those filthy date data:
+wa_metadata_clean = clean_date_columns(metadata = wa_metadata_clean)
 
 # ---rename columns: original -> new name
 wa_metadata_clean = wa_metadata_clean.rename(columns={
