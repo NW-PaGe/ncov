@@ -12,7 +12,7 @@ def read_files(input_file_1, input_file_2):
 def rename_columns(doh_metadata):
     doh_metadata = doh_metadata.rename(columns={
     'COUNTY_NAME': 'County',
-    'SEQUENCE_GISAID_STRAIN': 'strain'})
+    'SEQUENCE_GENBANK_STRAIN': 'strain'})
     return doh_metadata
 
 # set index for doh metadata
