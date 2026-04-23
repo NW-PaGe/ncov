@@ -68,8 +68,8 @@ This build uses NCBI data and the SARS-Cov-2 Global Remote Dataset available on 
 
 To include more contextualization, one could use the Full SARS-Covo2 Remote Dataset for the contextual sequences, however doing so may require AWS Batch to subsample from the dataset.
 
-- **Sequence Data**: GenBank SARS-Cov-2 data from Datasets and Nextstrain.org SC2 Remote Dataset sourced GenBank
-- **Metadata**: GenBank SARS-Cov-2 data from Datasets, Nextstrain.org SC2 Remote Dataset sourced GenBank and WA DOH county-level data
+- **Sequence Data**: GenBank SARS-Cov-2 data from NCBI Datasets and Nextstrain.org SC2 Remote Dataset sourced GenBank
+- **Metadata**: GenBank SARS-Cov-2 data from NCBI Datasets, Nextstrain.org SC2 Remote Dataset sourced GenBank and WA DOH county-level data
 - **Expected Inputs**:
     - `ncov_wa/data/county_metadata.csv` (contains most recent line list of GenBank accession number and Washington State county designation)
     -  Other sequencing and metadata will be automatically downloaded and ingested as part of the pipeline
@@ -120,7 +120,7 @@ When running the build, the `county_metadata.csv` should be updated to capture t
 To run the build, make sure you are in the correct directory file "ncov".  The below code specifies how many CPUs to use as well as which config file to use. In this case, we are specifying to use the  `ncov_wa/config/build.yaml` with our Washington-specific parameters.
 
 ```
-nextstrain build --cpus=6 . --configfile ncov_wa/config/builds.yaml
+nextstrain build --cpus=6 . --configfile ncov_wa/config/builds_ncbi.yaml
 ```
 
 When you run the build using `nextstrain build .`, Nextstrain uses Snakemake as the workflow manager to automate genomic analyses. The Snakefile in a Nextstrain build defines how raw input data (sequences and metadata) are processed step-by-step in an automated way. Nextstrain builds are powered by Augur (for phylogenetics) and Auspice (for visualization) and Snakemake is used to automate the execution of these steps using Augur and Auspice based on file dependencies.
