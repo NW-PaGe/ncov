@@ -7,7 +7,6 @@ inputs:
   - name: wa_1y
     metadata: "data/wa-sequences.tar.xz" #this is the compressed verison of the cleared and filtered wa data
     sequences: "data/wa-sequences.tar.xz"
-    skip_diagnostics: true
   - name: contextual
     metadata: "https://data.nextstrain.org/files/ncov/open/global/metadata.tsv.xz"
     sequences: "https://data.nextstrain.org/files/ncov/open/global/sequences.fasta.xz"
@@ -30,6 +29,8 @@ builds:
 
 filters:
   min_length: 27000
+  wa_1y:
+    skip_diagnostics: true
 
 # Define subsampling scheme for builds. This scheme should include as much
 # local diversity for a given division as possible and contextual samples from
