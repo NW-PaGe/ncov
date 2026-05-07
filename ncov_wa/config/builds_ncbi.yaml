@@ -7,6 +7,7 @@ inputs:
   - name: wa_1y
     metadata: "data/wa-sequences.tar.xz" #this is the compressed verison of the cleared and filtered wa data
     sequences: "data/wa-sequences.tar.xz"
+    skip_diagnostics: true
   - name: contextual
     metadata: "https://data.nextstrain.org/files/ncov/open/global/metadata.tsv.xz"
     sequences: "https://data.nextstrain.org/files/ncov/open/global/sequences.fasta.xz"
@@ -36,27 +37,27 @@ filters:
 subsampling:
   one-year-priority:
     local-focus:
-      min_date: --min-date 2025
-      min_length: --min_length 27000
-      query: --query "(country == 'USA' & division == '{division}')"
+      min_date: 2025
+      min_length: 27000
+      query: "(country == 'USA' & division == '{division}')"
       #other_filters: "--include-where 'division=Washington'"
       #max_sequences: 17000
     # Included to accurately reconstruct # of introductions.
     contextual-proximity:
-      min_date: --min-date 2020
-      min_length: --min_length 27000
+      min_date: 2020
+      min_length: 27000
       max_sequences: 1000
-      query: --query "contextual == 'yes'"
+      query: "contextual == 'yes'"
       priorities:
         type: proximity
         focus: local-focus
         crowding_penalty: 0
     # Included for accurate clade timing.
     contextual-random:
-      min_date: --min-date 2020
+      min_date: 2020
       max_sequences: 500
       group_by: "month year"
-      query: --query "contextual == 'yes'"
+      query: "contextual == 'yes'"
 
 # mask sites in genomes
 # These are 1-indexed coordinates of sites that have been identified as prone to sequencing errors
