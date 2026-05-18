@@ -29,6 +29,8 @@ builds:
 
 filters:
   min_length: 27000
+  wa_1y:
+    skip_diagnostics: true
 
 # Define subsampling scheme for builds. This scheme should include as much
 # local diversity for a given division as possible and contextual samples from
@@ -36,15 +38,15 @@ filters:
 subsampling:
   one-year-priority:
     local-focus:
-      min_date: --min-date 2025
-      min_length: --min_length 27000
+      min_date: --min-date 2025-01-01
+      min_length: --min-length 27000
       query: --query "(country == 'USA' & division == '{division}')"
       #other_filters: "--include-where 'division=Washington'"
       #max_sequences: 17000
     # Included to accurately reconstruct # of introductions.
     contextual-proximity:
-      min_date: --min-date 2020
-      min_length: --min_length 27000
+      min_date: --min-date 2020-01-01
+      min_length: --min-length 27000
       max_sequences: 1000
       query: --query "contextual == 'yes'"
       priorities:
@@ -53,7 +55,7 @@ subsampling:
         crowding_penalty: 0
     # Included for accurate clade timing.
     contextual-random:
-      min_date: --min-date 2020
+      min_date: --min-date 2020-01-01
       max_sequences: 500
       group_by: "month year"
       query: --query "contextual == 'yes'"
