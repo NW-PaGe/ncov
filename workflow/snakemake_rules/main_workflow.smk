@@ -983,34 +983,6 @@ rule clades:
             --output-node-data {output.clade_data} 2>&1 | tee {log}
         """
 
-rule emerging_lineages:
-    message: "Adding emerging clade labels"
-    input:
-        tree = rules.refine.output.tree,
-        aa_muts = rules.translate.output.node_data,
-        nuc_muts = rules.ancestral.output.node_data,
-        emerging_lineages = config["files"]["emerging_lineages"],
-        clades = config["files"]["clades"]
-    output:
-        clade_data = "results/{build_name}/emerging_lineages.json"
-    log:
-        "logs/emerging_lineages_{build_name}.txt"
-    benchmark:
-        "benchmarks/emerging_lineages_{build_name}.txt"
-    resources:
-        # Memory use scales primarily with size of the node data.
-        mem_mb=lambda wildcards, input: 3 * int(input.size_mb)
-    conda: config["conda_environment"]
-    shell:
-        r"""
-        augur clades --tree {input.tree} \
-            --mutations {input.nuc_muts} {input.aa_muts} \
-            --clades {input.emerging_lineages} \
-            --membership-name emerging_lineage \
-            --label-name emerging_lineage \
-            --output-node-data {output.clade_data} 2>&1 | tee {log}
-        """
-
 rule colors:
     message: "Constructing colors file"
     input:
@@ -1143,36 +1115,6 @@ rule calculate_epiweeks:
             --output-node-data {output.node_data} 2>&1 | tee {log}
         """
 
-rule find_clusters:
-    input:
-        tree="results/{build_name}/tree_raw.nwk",
-        metadata="results/{build_name}/metadata_adjusted.tsv.xz",
-        mutations="results/{build_name}/nt_muts.json",
-    output:
-        clusters="results/{build_name}/clusters.tsv",
-    benchmark:
-        "benchmarks/find_clusters_{build_name}.txt",
-    conda:
-        config["conda_environment"],
-    log:
-        "logs/find_clusters_{build_name}.txt",
-    params:
-        min_tips=config["cluster"]["min_tips"],
-        group_by=config["cluster"]["group_by"],
-    resources:
-        mem_mb=12000,
-    shell:
-       r"""
-       python3 scripts/find_clusters.py \
-           --tree {input.tree} \
-           --metadata {input.metadata} \
-           --mutations {input.mutations} \
-           --min-tips {params.min_tips} \
-           --group-by {params.group_by} \
-           --output {output.clusters}
-       """
-
-
 def export_title(wildcards):
     # TODO: maybe we could replace this with a config entry for full/human-readable build name?
     location_name = wildcards.build_name
@@ -1211,7 +1153,6 @@ def _get_node_data_by_wildcards(wildcards):
         rules.ancestral.output.node_data,
         rules.translate.output.node_data,
         rules.clades.output.clade_data,
-        rules.emerging_lineages.output.clade_data,
         rules.recency.output.node_data,
         rules.traits.output.node_data,
         rules.mlr_lineage_fitness.output.node_data,

@@ -59,7 +59,6 @@ files:
   reference: "defaults/reference_seq.gb"
   alignment_reference: "defaults/reference_seq.fasta"
   annotation: "defaults/annotation.gff"
-  outgroup: "defaults/outgroup.fasta" # is this arg still used? file doesn't exist in gh repo
   ordering: "defaults/color_ordering.tsv"
   color_schemes: "defaults/color_schemes.tsv"
   auspice_config: "defaults/auspice_config.json"
@@ -67,7 +66,6 @@ files:
   description: "defaults/description.md"
   clades: "defaults/clades.tsv"
   clade_name_mapping: "defaults/clade_display_names.yml"
-  emerging_lineages: "defaults/emerging_lineages.tsv"
   sites_to_mask: "defaults/sites_ignored_for_tree_topology.txt"
 
 # Define genes to translate during alignment by nextclade.
@@ -171,13 +169,6 @@ frequencies:
   minimal_frequency: 0.01
   stiffness: 20
   inertia: 0.2
-
-# Cluster-specific settings
-cluster:
-  # Require a minimum number of tips to be annotated as a cluster.
-  min_tips: 3
-  # Find clusters with the same values in the given column (e.g., division, country, etc.).
-  group_by: division
 
 #
 # Region-specific settings

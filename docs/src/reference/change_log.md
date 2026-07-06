@@ -9,6 +9,10 @@ We also use this change log to document new features that maintain backward comp
 - 29 July 2025: Improved performance of calls to `augur filter`. This requires a minimum Augur version of 31.3.0. [PR 1178](https://github.com/nextstrain/ncov/pull/1178)
 - 28 January 2026: Large JSON files are now automatically minified. This requires a minimum Augur version of 33.0.0. [PR 1194](https://github.com/nextstrain/ncov/pull/1194)
 - 30 January 2026: Simplified code for reading metadata. This requires a minimum Augur version of 32.1.0. [PR 1195](https://github.com/nextstrain/ncov/pull/1195)
+- 26 June 2026: Remove the historical 21L (BA.2-rooted) GISAID build variant (the `nextstrain-gisaid-21L` profile and its scheduled workflow). The Nextstrain clade `21L` and the `sars-cov-2-21L` Nextclade dataset are unaffected. [PR 1211](https://github.com/nextstrain/ncov/pull/1211)
+- 26 June 2026: Remove orphan rules `find_clusters` and `extract_meta` (and the `cluster` config block) whose outputs were never consumed. [PR 1209](https://github.com/nextstrain/ncov/pull/1209)
+- 26 June 2026: Remove the stale `emerging_lineage`, `immune_escape`, and `ace2_binding` colorings, along with the now-unused `files.emerging_lineages` config parameter and `defaults/emerging_lineages.tsv`. The latter two colorings were computed from BA.2 deep-mutational-scanning data and are no longer accurate against current strains. [PR 1213](https://github.com/nextstrain/ncov/pull/1213)
+- 26 June 2026: Remove dead scripts, unused default data files, and the no-longer-used `outgroup` config option as part of a workflow cleanup. [PR 1208](https://github.com/nextstrain/ncov/pull/1208)
 
 ## v17 (17 July 2025)
 
@@ -142,7 +146,7 @@ We also use this change log to document new features that maintain backward comp
 
  - 11 August 2021: Add support for "Sequences" and "Patient status metadata" downloads from GISAID's search interface including [documentation in the tutorial of how to use these data](https://docs.nextstrain.org/projects/ncov/en/latest/guides/data-prep/gisaid-search.html). ([#701](https://github.com/nextstrain/ncov/pull/701))
  - 6 August 2021: We've replaced the mechanisms that support remote file inputs (e.g. `s3://` URLs) to improve internal workflow structure, extend support to `gs://`, `http://`, and `https://` URLs, and expand support for compressed inputs.
-   Our [remote file inputs documentation](remote_inputs) is updated to reflect the changes.
+   Our [remote file inputs documentation](https://docs.nextstrain.org/projects/ncov/en/latest/reference/remote_inputs.html) is updated to reflect the changes.
 
    This change should be backwards compatible and largely transparent to end users.
    The most visible change for anyone using remote file inputs is the local download location of the remote files: instead of being within the `results/` directory, dynamic directories based on the remote URL are now used.
@@ -153,7 +157,7 @@ We also use this change log to document new features that maintain backward comp
  Please see [PR #628](https://github.com/nextstrain/ncov/pull/628) for full details. Briefly:
      - The (GISAID) profile has been renamed to `./nextstrain_profiles/nextstrain-gisaid`
      - A new "open" (GenBank) profile has been added `./nextstrain_profiles/nextstrain-open`
-     - Intermediate open (GenBank) files, including sequences, & alignments are now publicly available for workflows to use as starting points. See the [remote inputs documentation](remote_inputs) for details.
+     - Intermediate open (GenBank) files, including sequences, & alignments are now publicly available for workflows to use as starting points. See the [remote inputs documentation](https://docs.nextstrain.org/projects/ncov/en/latest/reference/remote_inputs.html) for details.
  - 3 July 2021: Allow optional prefixing of `hCoV-19/` to strain names when exporting Auspice JSON for visualization. This is specified via the config option `include_hcov19_prefix`. This is included in Nextstrain-maintained builds at the request of GISAID.
  - 27 June 2021: Update clade definitions with 21G (Lambda, C.37) emerging from Peru and 21H (B.1.621) emerging from Colombia.
  - 22 June 2021: Add the ability to specify subsampling via a `priorities.tsv` file. To use, set the `priorities > type: file` and add `priorities > file: path/to/priorities.tsv` to your build's `subsampling` schema. `priorities.tsv` contains `strain name\tarbitrary numerical value`. Higher values = higher priority. ([#664](https://github.com/nextstrain/ncov/pull/664))
