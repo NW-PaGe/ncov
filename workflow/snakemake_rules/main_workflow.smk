@@ -282,7 +282,6 @@ rule subsample:
         """
     input:
         metadata = _get_unified_metadata,
-        include = config["files"]["include"],
         priorities = get_priorities,
         exclude = config["files"]["exclude"]
     output:
@@ -313,7 +312,6 @@ rule subsample:
         r"""
         augur filter \
             --metadata {input.metadata} \
-            --include {input.include} \
             --exclude {input.exclude} \
             {params.min_date} \
             {params.max_date} \
@@ -327,7 +325,8 @@ rule subsample:
             {params.sequences_per_group} \
             {params.subsample_max_sequences} \
             {params.sampling_scheme} \
-            --output-strains {output.strains} 2>&1 | tee {log}
+            --output-strains {output.strains} \
+            --empty-output-reporting warn 2>&1 | tee {log}
         """
 
 rule extract_subsampled_sequences:
@@ -375,20 +374,24 @@ rule proximity_score:
     benchmark:
         "benchmarks/proximity_score_{build_name}_{focus}.txt"
     params:
-        chunk_size=10000,
         ignore_seqs = config['refine']['root']
     resources:
-        # Memory scales at ~0.15 MB * chunk_size (e.g., 0.15 MB * 10000 = 1.5GB).
-        mem_mb=4000
+        # proximity_score holds dense `chunk_size x n_focal` distance matrices in memory.
+        # The shell below shrinks chunk_size as the focal set grows so those matrices stay
+        # ~2.8 GB regardless of focal size (measured peak ~4 GB incl. baseline + focal data);
+        # total runtime is ~independent of chunk size. mem_mb sits above that worst case.
+        mem_mb=6000
     conda: config["conda_environment"]
     shell:
         r"""
+        n_focal=$(grep -c '^>' {input.focal_alignment} || echo 1)
+        chunk_size=$(python3 -c "n=max(1,$n_focal); print(max(1000, min(10000, 2800000000 // (48 * n))))")
         python3 scripts/get_distance_to_focal_set.py \
             --reference {input.reference} \
             --alignment {input.alignment} \
             --focal-alignment {input.focal_alignment} \
             --ignore-seqs {params.ignore_seqs} \
-            --chunk-size {params.chunk_size} \
+            --chunk-size $chunk_size \
             --output {output.proximities} 2>&1 | tee {log}
         """
 
@@ -403,6 +406,10 @@ rule priority_score:
     params:
         crowding = config["priorities"]["crowding_penalty"],
         Nweight = 0.003
+    resources:
+        # priorities.py loads the per-pool proximity TSV + sequence index into pandas, so
+        # memory scales with the candidate-pool size (empirically ~10x these inputs).
+        mem_mb = lambda wildcards, input: max(4000, int(12 * input.size_mb))
     conda: config["conda_environment"]
     shell:
         r"""
@@ -416,12 +423,12 @@ rule priority_score:
 
 
 def _get_subsampled_files(wildcards):
-    subsampling_settings = _get_subsampling_settings(wildcards)
-
-    return [
+    files = [
         f"results/{wildcards.build_name}/sample-{subsample}.txt"
-        for subsample in subsampling_settings
+        for subsample in _get_subsampling_settings(wildcards)
     ]
+    files.append(config["files"]["include"])
+    return files
 
 rule combine_samples:
     input:
@@ -983,8 +990,8 @@ rule clades:
             --output-node-data {output.clade_data} 2>&1 | tee {log}
         """
 
-rule colors:
-    message: "Constructing colors file"
+rule clade_colors:
+    message: "Constructing clade colors file"
     input:
         ordering = config["files"]["ordering"],
         color_schemes = config["files"]["color_schemes"],
@@ -993,11 +1000,11 @@ rule colors:
     params:
         clade_recency_argument = _get_clade_recency_argument
     output:
-        colors = "results/{build_name}/colors.tsv"
+        colors = "results/{build_name}/clade_colors.tsv"
     log:
-        "logs/colors_{build_name}.txt"
+        "logs/clade_colors_{build_name}.txt"
     benchmark:
-        "benchmarks/colors_{build_name}.txt"
+        "benchmarks/clade_colors_{build_name}.txt"
     resources:
         # Memory use scales primarily with the size of the metadata file.
         # Compared to other rules, this rule loads metadata as a pandas
@@ -1006,13 +1013,46 @@ rule colors:
     conda: config["conda_environment"]
     shell:
         r"""
-        python3 scripts/assign-colors.py \
+        python3 scripts/assign-clade-colors.py \
             --ordering {input.ordering} \
             --color-schemes {input.color_schemes} \
             --output {output.colors} \
             --clade-node-data {input.clades} \
             {params.clade_recency_argument} \
             --metadata {input.metadata} 2>&1 | tee {log}
+        """
+
+rule lineage_colors:
+    message: "Adding Pango lineage colors that correspond to the clade coloring"
+    input:
+        clade_colors = rules.clade_colors.output.colors,
+        ordering = config["files"]["ordering"],
+        color_schemes = config["files"]["color_schemes"],
+        metadata="results/{build_name}/metadata_adjusted.tsv.xz",
+        clades = rules.clades.output.clade_data,
+        nextclade_dataset = "data/sars-cov-2-nextclade-defaults.zip"
+    params:
+        clade_recency_argument = _get_clade_recency_argument
+    output:
+        colors = "results/{build_name}/colors.tsv"
+    log:
+        "logs/lineage_colors_{build_name}.txt"
+    benchmark:
+        "benchmarks/lineage_colors_{build_name}.txt"
+    resources:
+        mem_mb=lambda wildcards, input: 5 * int(async_run(input['metadata'].size()) / 1024 / 1024)
+    conda: config["conda_environment"]
+    shell:
+        r"""
+        python3 scripts/assign-lineage-colors.py \
+            --input-colors {input.clade_colors} \
+            --clade-node-data {input.clades} \
+            --metadata {input.metadata} \
+            {params.clade_recency_argument} \
+            --color-schemes {input.color_schemes} \
+            --nextclade-dataset {input.nextclade_dataset} \
+            --clade-ordering {input.ordering} \
+            --output {output.colors} 2>&1 | tee {log}
         """
 
 rule recency:
@@ -1219,7 +1259,7 @@ rule export:
         metadata="results/{build_name}/metadata_adjusted.tsv.xz",
         node_data = _get_node_data_by_wildcards,
         auspice_config = get_auspice_config,
-        colors = lambda w: config["builds"][w.build_name]["colors"] if "colors" in config["builds"].get(w.build_name, {}) else ( config["files"]["colors"] if "colors" in config["files"] else rules.colors.output.colors.format(**w) ),
+        colors = lambda w: config["builds"][w.build_name]["colors"] if "colors" in config["builds"].get(w.build_name, {}) else ( config["files"]["colors"] if "colors" in config["files"] else rules.lineage_colors.output.colors.format(**w) ),
         lat_longs = config["files"]["lat_longs"],
         description = rules.build_description.output.description
     output:
