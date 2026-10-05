@@ -321,3 +321,32 @@ clade	gene	site	alt
 26B	nuc	28822	G
 26B	nuc	15762	C
 26B	nuc	23600	C
+
+26C	clade	25B
+26C	nuc	10156	T
+26C	nuc	19175	G
+26C	nuc	20361	C
+26C	nuc	22320	G
+26C	nuc	22812	C
+26C	nuc	22820	A
+26C	nuc	25461	G
+26C	nuc	27916	A
+26C	nuc	28677	T
+
+26D	clade	25E
+26D	nuc	1722	T
+26D	nuc	8863	A
+26D	nuc	23598	G
+26D	nuc	11851	T
+26D	nuc	22865	T
+26D	nuc	29774	T
+26D	nuc	22021	T
+26D	nuc	22995	C
+
+26E	clade	25B
+26E	nuc	22995	C
+26E	nuc	21343	G
+26E	nuc	26046	G
+26E	nuc	6572	C
+26E	nuc	22896	C
+26E	nuc	22820	A
